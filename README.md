@@ -56,7 +56,7 @@ Nếu app đang chạy tốt mà không có Redux, vậy có thể app đó khô
 
 - Redux sử dụng kiến trúc một chiều uni-directional data flow
 - Redux chỉ dùng 1 store duy nhất làm Single Source of Truth
-- Redux state là READ-ONLY. Muốn Uodate phải dispatch một action (js object)
+- Redux state là READ-ONLY. Muốn Update phải dispatch một action (js object)
 - Những thay đổi của redux state được thực hiện bới Pure functions (reducer)
 - Redux có thể dùng cho các javascript apps, không chỉ riêng gì ReactJS
 - Với những app nhỏ và sử dụng không quá phức tạp -> Context API
@@ -64,7 +64,124 @@ Nếu app đang chạy tốt mà không có Redux, vậy có thể app đó khô
 
 ### Trong store có reducer và trong reducer có state
 
-### Các bước chuẩn bị
+### Tải : npm i --save redux react-redux
 
-- B1 : npm i redux react-redux
-- B2 : Tạo 1 folder tên redux chứa 3 file jsx là actions.jsx, reducer.jsx, store.jsx
+### Tổ chức folder
+
+src
+|** reducers
+| |** hobby.js
+| |** todo.js
+| |** ... (one reducer per file)
+| |** index.js (root reducer)
+|
+|** actions
+| |** hobby.js
+| |** todo.js
+| |** ...
+|
+|** pages
+| |** HomePage/index.jsx (connect to redux)
+|
+|** store.js (reducers, init state, middlewares)
+|\_\_ index.js (setup Store Provider)
+
+### Setup reducers và rootreducer
+
+```jsx
+// reducers/hobby.js
+const initialState = {
+  list: ["Listening to music"],
+  selectedId: null,
+};
+const hobbyReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "ADD_HOBBY": {
+      const newList = [...state.list];
+      newList.push(action.payload);
+      return {
+        ...state,
+        list: newList,
+      };
+    }
+    default:
+      return state;
+  }
+};
+export default hobbyReducer;
+```
+
+```jsx
+// reducers/index.js (ROOT)
+const rootReducer = combineReducers({
+  hobby: hobbyReducer,
+});
+export default rootReducer;
+```
+
+### Setup redux store
+
+```jsx
+// src/store.js
+const store = createStore(rootReducer);
+export default store;
+```
+
+### Setup Store Provider cho toàn app src/index.js
+
+```jsx
+const Main = () => (
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+```
+
+### Connect vào redux từ reactjs component
+
+- Với class component: dùng HOC connect()
+- Với functional component: dùng hooks useSelector() và useDispatch()
+
+```jsx
+function HomePage(props) {
+  const hobbyList = useSelector((state) => state.hobby.list);
+  const dispatch = useDispatch();
+  const handleAddHobbyClick = () => {
+    const newHobby = "Coding";
+    dispatch({
+      type: "ADD_HOBBY",
+      payload: newHobby,
+    });
+  };
+  return (
+    <div className="home-page">
+      <HobbyList data={hobbyList} />
+      <button onClick={handleAddHobbyClick}>Add new hobby</button>
+    </div>
+  );
+}
+export default HomePage;
+```
+
+### Làm việc với Redux thông qua hooks
+
+- useSelector()
+- useDispatch()
+
+### Setup redux store
+
+- Reducers & Root reducer
+- Action creators
+- Store
+
+### Setup redux provider
+
+- Allow redux store to be accessible from anywhere ò the app.
+
+### Connect to redux store from component
+
+- Using the tưo hooks here
+
+### Random dữ liệu
+
+- npm i --save casual
